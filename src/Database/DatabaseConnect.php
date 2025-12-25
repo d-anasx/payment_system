@@ -1,5 +1,4 @@
 <?php
-
 Class DatabaseConnect {
     private $host = 'localhost';
     private $dbname = 'payment_system';

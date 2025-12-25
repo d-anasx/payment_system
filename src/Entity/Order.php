@@ -3,14 +3,14 @@
 class Order {
     private $id;
     private $totalAmount;
-    private $statut;
+    private $status;
     private $client;
 
-    public function __construct($id, $totalAmount , $statut, $client)
+    public function __construct($id, $totalAmount , $status, $client)
     {
         $this->id = $id;
         $this->totalAmount = $totalAmount;
-        $this->statut = $statut;
+        $this->status = $status;
         $this->client = $client;
         
     }

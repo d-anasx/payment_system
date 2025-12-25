@@ -16,10 +16,11 @@ class ClientRepository {
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-
+        echo "\n";
         foreach ($result as $e) {
             echo "id : ".$e["id"]."   name : ".$e["name"]."   email : ".$e["email"]."\n";
         }
+        echo "\n";
 
     }
 
@@ -30,9 +31,20 @@ class ClientRepository {
         $conn = $db->connect();
         $sql = 'INSERT into clients (name,email) values (?,?) ';
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(1,$name,PDO::PARAM_STR);
-        $stmt->bindParam(2,$email,PDO::PARAM_STR);
+        $stmt->bindParam(1,$name);
+        $stmt->bindParam(2,$email);
         $stmt->execute();
+    }
+
+    public function getOne($clientId){
+        $db = new DatabaseConnect();
+        $conn = $db->connect();
+        $sql = "SELECT * from clients where id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(1,$clientId);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        return $result[0];
     }
 }
 
