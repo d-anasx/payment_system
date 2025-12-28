@@ -18,6 +18,16 @@ class OrderRepository {
         return $result;
     }
 
+    public function getPendingOrders(){
+        $db = new DatabaseConnect();
+        $conn = $db->connect();
+        $sql = "SELECT * from orders where status = 'pending'";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        return $result;
+    }
+
     public function addOrder($order,$clientId){
         $status = $order->status;
         $total = $order->totalAmount;
@@ -41,7 +51,14 @@ class OrderRepository {
         return $result[0];
     }
 
-    
+    public function changeStatusToDelivered($orderId){
+        $db = new DatabaseConnect();
+        $conn = $db->connect();
+        $sql = 'UPDATE orders set status="delivered" where id=? ';
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(1,$orderId);
+            $stmt->execute();
+    }
 
 }
 

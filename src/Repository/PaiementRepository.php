@@ -17,6 +17,17 @@ class PaiementRepository {
         return $result;
     }
 
+    public function getOne($paymentId){
+        $db = new DatabaseConnect();
+        $conn = $db->connect();
+        $sql = "SELECT * from payments where id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(1,$paymentId);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        return $result[0];
+    }
+
     public function getPaymentInfos($paymentId, $type){
         if($type=="paypal") $table = 'paypal_payments';
         if($type=="bank_transfer") $table = 'bank_transfer_payments';
@@ -82,8 +93,15 @@ class PaiementRepository {
             $stmt->bindParam(2,$paymentId);
             $stmt->execute();
 
+    }
 
-        
+    public function changeStatusToPaid($paymentId){
+        $db = new DatabaseConnect();
+        $conn = $db->connect();
+        $sql = 'UPDATE payments set status="paid" where id=? ';
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(1,$paymentId);
+            $stmt->execute();
     }
     
 }

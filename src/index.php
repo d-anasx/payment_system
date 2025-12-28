@@ -39,10 +39,16 @@ public function getClientId(){
     return readline("select the client id : ");
 }
 
-public function getOrderId(){
-    $this->showOrders();
+public function getOrderId($status=null){
+    $this->showOrders($status=null);
     return readline("select the order id : ");
 }
+
+public function getPaymentId(){
+    $this->showPayments();
+    return readline("select the payment id : ");
+}
+
 
 public function showClients(){
     $DBclients = $this->clientRepo->getAll();
@@ -64,13 +70,18 @@ public function addClient(){
     $this->clientRepo->addClient($client);
 }
 
-public function showOrders(){
-    $DBOrders = $this->orderRepo->getAll();
+public function showOrders($status = null){
+    if(is_null($status)){
+        $DBOrders = $this->orderRepo->getAll();
+    }else{
+        $DBOrders = $this->orderRepo->getPendingOrders();
+    }
+    
     $orders = [];
     foreach ($DBOrders as $e) {
             $db_client = $this->clientRepo->getOne($e["client_id"]);
             $client = new Client($db_client["id"],$db_client["name"],$db_client["email"]);
-            array_push($orders, new Order($e["id"],$e["total_amount"],$client));
+            array_push($orders, new Order($e["id"],$e["total_amount"],$client,$e['status']));
         }
         echo "\n";
         foreach ($orders as $e) {
@@ -78,6 +89,8 @@ public function showOrders(){
         }
         echo "\n";
 }
+
+
 
 public function addOrder(){
     $clientId = $this->getClientId();
@@ -103,7 +116,8 @@ public function showPayments(){
                 $e["amount"],
                 $order,
                 $paypalInfos["email"],
-                $paypalInfos["password"]
+                $paypalInfos["password"],
+                $e["status"]
             ),
             "type" => "paypal"
         ];
@@ -116,7 +130,8 @@ public function showPayments(){
                 $e["id"],
                 $e["amount"],
                 $order,
-                $bankInfos["rib"]
+                $bankInfos["rib"],
+                $e["status"]
             ),
             "type" => "bank_transfer"
         ];
@@ -129,7 +144,8 @@ public function showPayments(){
                 $e["id"],
                 $e["amount"],
                 $order,
-                $bankInfos["card_number"]
+                $bankInfos["card_number"],
+                $e["status"]
             ),
             "type" => "card"
         ];
@@ -162,7 +178,7 @@ public function createBankCardPayment($order){
 }
 
 public function addPayment(){
-    $id = $this->getOrderId();
+    $id = $this->getOrderId("pending");
     $order = $this->orderRepo->getOne($id);
     $order = new Order($order["id"],$order["total_amount"],$order["status"]);
 
@@ -174,11 +190,38 @@ public function addPayment(){
     $this->paymentRepo->addPayment($payment);
 }
 
+public function getPaymentInstance($paymentId , $type){
+    $obj = match($type){
+        "paypal" => $this->paymentRepo->getPaymentInfos($paymentId,$type),
+        "bank_transfer" => $this->paymentRepo->getPaymentInfos($paymentId,"bank_transfer"),
+        "card" => $this->paymentRepo->getPaymentInfos($paymentId,"card")
+    };
+}
+
+public function validatePayment(){
+    
+    $paymentId = $this->getPaymentId();
+    $payment = $this->paymentRepo->getOne($paymentId);
+    $order = $this->orderRepo->getOne($payment["order_id"]);
+    $order = new Order($order["id"],$order["total_amount"],$order["status"]);
+    $type = $payment["payment_type"];
+    $obj = $this->paymentRepo->getPaymentInfos($paymentId,$type);
+
+    $paymentInstance = match($type){
+        "paypal" => new PayPal($paymentId , $payment['amount'] , $order, $obj["email"], $obj["password"]),
+        "bank_transfer" => new Virement($paymentId , $payment['amount'] , $order, $obj["rib"]),
+        "card" => new BankCard($paymentId , $payment['amount'] , $order, $obj["card_number"])
+    };
+
+    $paymentInstance->validatePayment($paymentId);
+    $order->deliver($order->id);
+}
+
 
 
 public function run(){
     while(1==1){
-    $a = readline("1 - show all clients\n2 - add client\n3 - show all orders\n4 - add order\n5 - show payments\n6 - add payment");
+    $a = readline("1 - show all clients\n2 - add client\n3 - show all orders\n4 - add order\n5 - show payments\n6 - add payment\n7 - validate payment");
     switch ($a){
     case 1 :
         $this->showClients();
@@ -197,6 +240,9 @@ public function run(){
         break;
     case 6 :
         $this->addPayment();
+        break;
+    case 7 :
+        $this->validatePayment();
         break;
 }  
 }

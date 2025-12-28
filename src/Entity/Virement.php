@@ -4,9 +4,9 @@ include_once 'src\Entity\Paiement.php';
 class Virement extends Paiement {
     private $rib;
 
-    public function __construct($id, $amount ,$order,$rib)
+    public function __construct($id, $amount ,$order,$rib,$status = self::PENDING_STATUS)
     {
-    parent::__construct($id, $amount ,$order);
+    parent::__construct($id, $amount ,$order,$status);
     $this->rib = $rib;
 
     }
@@ -20,10 +20,12 @@ class Virement extends Paiement {
         $this->$info = $value;
     }
 
-    public function validatePayment(){
+    public function validatePayment($paymentId){
 
         echo "paid with bank tansfer with rib : ".substr($this->rib,0,5)."xxxxxxxx";
         $this->status = self::PAID_STATUS;
+        $paymentRepo = new PaiementRepository();
+        $paymentRepo->changeStatusToPaid($paymentId);
         
 
     }
