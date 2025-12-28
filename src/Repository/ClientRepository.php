@@ -16,11 +16,7 @@ class ClientRepository {
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-        echo "\n";
-        foreach ($result as $e) {
-            echo "id : ".$e["id"]."   name : ".$e["name"]."   email : ".$e["email"]."\n";
-        }
-        echo "\n";
+        return $result;
 
     }
 

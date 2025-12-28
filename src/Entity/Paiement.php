@@ -3,21 +3,25 @@
 abstract class Paiement {
     protected $id;
     protected $amount;
-    protected $statut;
-    protected $date_paiement;
+    protected $status;
+    protected $payment_date;
     protected $order;
+    protected const PENDING_STATUS = "pending";
+    protected const PAID_STATUS = "paid";
+    protected const FAILED_STATUS = "failed";
 
-    public function __construct($id, $amount , $statut, $date_paiement,$order)
+    public function __construct($id, $amount,$order)
     {
         $this->id = $id;
         $this->amount = $amount;
-        $this->statut = $statut;
-        $this->date_paiement = $date_paiement;
+        $this->status = self::PENDING_STATUS;
+        $now = new DateTime();
+        $this->payment_date = $now->format("Y-m-d H:i:s");
         $this->order = $order;
         
     }
 
-    abstract public function handlePaiement();
+    abstract public function validatePayment();
 }
 
 

@@ -5,12 +5,15 @@ class Order {
     private $totalAmount;
     private $status;
     private $client;
+    private const PENDING_STATUS = "pending";
+    private const PAID_STATUS = "paid";
+    private const FAILED_STATUS = "failed";
 
-    public function __construct($id, $totalAmount , $status, $client)
+    public function __construct($id, $totalAmount, $client)
     {
         $this->id = $id;
         $this->totalAmount = $totalAmount;
-        $this->status = $status;
+        $this->status = self::PENDING_STATUS;
         $this->client = $client;
         
     }

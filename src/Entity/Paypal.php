@@ -1,24 +1,36 @@
 <?php
-include './Paiement.php';
+include_once 'src\Entity\Paiement.php';
 
 class Paypal extends Paiement {
     private $email;
     private $password;
 
-    public function __construct($id, $amount , $statut, $date_paiement,$order,$email,$password)
+    public function __construct($id, $amount,$order,$email,$password)
     {
-    parent::__construct($id, $amount , $statut, $date_paiement,$order);
+    parent::__construct($id, $amount ,$order);
     $this->email = $email;   
-    $this->password = $password;   
+    $this->password = $password;  
 
     }
-    public function handlePaiement(){
 
-        return "paid with paypal with email : ".$this->email;
+    public function __get($info)
+    {
+        return $this->$info;
+    }
+    
+    public function __set($info, $value)
+    {
+        $this->$info = $value;
+    }
+
+    public function validatePayment(){
+
+        echo "paid with paypal with email : ".$this->email;
+        $this->status = self::PAID_STATUS;
+        
 
     }
 }
-
 
 
 
