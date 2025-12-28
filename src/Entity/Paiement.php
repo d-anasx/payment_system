@@ -1,6 +1,8 @@
 <?php
 
-abstract class Paiement {
+include_once "src\Interface\PaiementInterface.php";
+
+abstract class Paiement implements PaiementInterface {
     protected $id;
     protected $amount;
     protected $status;
